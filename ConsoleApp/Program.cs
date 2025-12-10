@@ -51,3 +51,17 @@ Console.WriteLine( 1 + 1 ); // 2
 Console.WriteLine( "1" + 1); // "11" = konkatenacja (łączenie) stringów
 Console.WriteLine( 1 + "1" + 1); // (1 + "1") + 1 = "111"
 Console.WriteLine( 1 + 1 + "1"); // (1 + 1) + "1" = "21"
+
+
+Console.WriteLine(bundle[0]);
+Console.WriteLine(bundle[1]);
+Console.WriteLine(bundle[2]);
+Console.WriteLine(bundle[3]);
+Console.WriteLine(bundle[4]);
+
+bundle[2] = "55";
+Console.WriteLine(bundle.FullInfo);
+
+
+Console.WriteLine(bundle["name"]);
+Console.WriteLine(bundle["price"]);

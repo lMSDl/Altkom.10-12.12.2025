@@ -8,7 +8,8 @@ namespace ConsoleApp.Models; // ; zamiast klemrek powoduje, że namespace jest z
 //internal - modyfikator dostępu - oznacza, że z klasy można korzystać w obrębie projektu
 //public - modyfikator dostępu - oznacza, że z klasy można korzystać wszędzie
 //brak modyfikatora dostępu = internal (dla klas) - wybierany jest najniższy poziom dostępu
-/*internal*/ class Product
+/*internal*/
+class Product
 {
 
     //metoda konstrukcyjna  (konstruktor) - bezparametrowy
@@ -55,7 +56,7 @@ namespace ConsoleApp.Models; // ; zamiast klemrek powoduje, że namespace jest z
     //setter - do ustawiania wartości - metoda przyjmuje parametr, który zostaje wpisany w odpowiednie pole (można dodać kod "obróbki danych")
     //void - metoda nic nie zwaraca
     public void SetProductionDate(DateTime productionDate)
-    {        
+    {
         //metoda ustawiająca wartość pola - nie zwraca nic, więc jest typu void
         _productionDate = productionDate.Date; //obróbka danych - zapisujemy tylko datę bez czasu
 
@@ -69,7 +70,7 @@ namespace ConsoleApp.Models; // ; zamiast klemrek powoduje, że namespace jest z
 
     //auto-property
     //właściwość integruje w sobie pole i metody dostępowe (getter i setter)
-    public string Name { get;set; }
+    public string Name { get; set; }
 
     //jest możliwość zmiany modyfikatora dostępu dla getter lub setter (osobno)
     public int Id { get; /*private*/ set; }
@@ -140,6 +141,61 @@ namespace ConsoleApp.Models; // ; zamiast klemrek powoduje, że namespace jest z
     {
         left.Price += right;
         return left;
+    }
+
+    //indexer - pozwala na dostęp do obiektu klasy jak do tablicy lub słownika
+    //możemy dodać też setter, żeby móc ustawiać wartości w klasie
+    public string this[int index]
+    {
+        get
+        {
+            switch (index)
+            {
+                case 0:
+                    return Name;
+                case 1:
+                    return Id.ToString();
+                case 2:
+                    return Price.ToString();
+                default:
+                    return "Invalid index";
+            }
+        }
+
+        set
+        {
+            switch (index)
+            {
+                case 0:
+                    Name = value;
+                    break;
+                case 1:
+                    if (int.TryParse(value, out int id))
+                        Id = id;
+                    break;
+                case 2:
+                    if (float.TryParse(value, out float price))
+                        Price = price;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public string this[string index]
+    {
+        get
+        {
+            //switch expression - pozwala na bardziej zwięzłe zapisywanie switcha
+            return index.ToLower() switch
+            {
+                "name" => Name,
+                "id" => Id.ToString(),
+                "price" => Price.ToString(),
+                _ => "Invalid index",
+            };
+        }
     }
 
 }
