@@ -65,3 +65,15 @@ Console.WriteLine(bundle.FullInfo);
 
 Console.WriteLine(bundle["name"]);
 Console.WriteLine(bundle["price"]);
+
+
+Pizza pizza = new Pizza(true, false, true);
+
+//utworzenie obiektu klasy Pizza z wykorzystaniem inicjalizatora obiektów
+//inicjalizator obiektów - pozwala na utworzenie obiektu i jednoczesne przypisanie wartości do jego pól lub właściwości
+//używa się go poprzez nawiasy klamrowe po konstruktorze
+//inicjalizator obiektów jest przydatny, gdy chcemy utworzyć obiekt i od razu przypisać mu wartości - często zastępuje wzorzec Buildera
+pizza = new Pizza() { HasCheese = true, HasPepperoni = false, HasMushrooms = true, HasSpinach = true, HasExtraCheese = true };
+
+product = new Product() { Name = "TV", Price = 1500.0f, Id = 10, Description = "4K Ultra HD Smart TV", ExpirationDate = DateTime.Now.AddYears(5) };
+product = new Product("Refrigerator", DateTime.Now.AddYears(10)) { Price = 800.0f, Id = 11, Description = "Double Door Refrigerator"};
