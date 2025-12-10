@@ -18,3 +18,9 @@ Console.WriteLine(product.Name);
 product.ExpirationDate = DateTime.Now.AddYears(1);
 
 Console.WriteLine(product.FullInfo);
+
+product = new Product("Tablet");
+Console.WriteLine(product.FullInfo);
+
+product = new Product("Smartphone", DateTime.Now.AddMonths(6));
+Console.WriteLine(product.FullInfo);

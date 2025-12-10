@@ -10,6 +10,33 @@ namespace ConsoleApp.Models; // ; zamiast klemrek powoduje, że namespace jest z
 //brak modyfikatora dostępu = internal (dla klas) - wybierany jest najniższy poziom dostępu
 /*internal*/ class Product
 {
+
+    //metoda konstrukcyjna  (konstruktor) - bezparametrowy
+    //konstruktor ustawia wszystkie pola na domyślne wartości
+    //metody konstrukcyjne są potrzebne, aby wstępnie skonfugorować produkt
+    //brak określenia typu zwracanego i nazwa taka sama jak nazwa klasy
+    //jeśli klasa nie ma żadnego zdefiniowanego konstruktora, to konstruktor bezparametrowy jest generowany automatycznie
+    public Product()
+    {
+        SetProductionDate(DateTime.Now);
+    }
+
+    //konstruktor parametrowy - służy do zapewnienia klasie wartości początkowych przekazanych jako parametry
+    //przeciążenie metody konstrukcyjnej = wiele metod o tej samej nazwie, ale przyjmujące inne parametry
+    //: this(..) - odwołanie się do innego konstruktora. W ten sposób tworzy się konstruktory teleskopowe (rozszeżają swoje możliwości niwelując powtarzający się kod) - jest to opcjonalne
+    public Product(string name) : this() //wywołanie konstruktora bezparametrowego
+    {
+        Name = name;
+    }
+
+    //jeśli w klasie występuje jakiś konstuktor parametrowy, to konstuktor bezparametrowy nie zostanie automatycznie wygenerowany
+    //chcąc posiadać jednocześnie konstruktor parametrowy i bezparametrowy musimy go (ten bezparametrowy) jawnie utworzyć
+    public Product(string name, DateTime expirationDate) : this(name)
+    {
+        ExpirationDate = expirationDate;
+    }
+
+
     //pole - zmienna, która przechowuje wartość
     //private - oznacza dostęp tylko dla elementów danej klasy
     //inne możliwe modyfikatory dostępu to: public, protected, internal, protected internal
