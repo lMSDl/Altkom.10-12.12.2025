@@ -73,6 +73,7 @@ namespace ConsoleApp.Models; // ; zamiast klemrek powoduje, że namespace jest z
 
     //jest możliwość zmiany modyfikatora dostępu dla getter lub setter (osobno)
     public int Id { get; /*private*/ set; }
+    public float Price { get; set; }
 
 
     //full-property
@@ -110,13 +111,36 @@ namespace ConsoleApp.Models; // ; zamiast klemrek powoduje, że namespace jest z
     //nie posiada settera
     public string FullInfo
     {
-        get { return $"Id: {Id}, Name: {Name}, ProductionDate: {GetProductionDate()}, ExpirationDate: {ExpirationDate}"; }
+        get { return $"Id: {Id}, Name: {Name}, Price: {Price}, ProductionDate: {GetProductionDate()}, ExpirationDate: {ExpirationDate}"; }
     }
 
     //metoda realizucjąca to samo co powyższe read-only property
     public string GetFullInfo()
     {
-        return $"Id: {Id}, Name: {Name}, ProductionDate: {GetProductionDate()}, ExpirationDate: {ExpirationDate}";
+        return FullInfo;
     }
+
+    //przeciążenie operatora + - pozwala na dodawanie dwóch obiektów klasy Product - w tym przypadku robiony jest zestaw z 2 produków
+    //przeciążenie wymaga zdefiniowania metody statycznej, która przyjmuje dwa parametry (lewa i prawa strona operatora) oraz słowa kluczowego "operator"
+    //możemy przeciążać operatory, które są zdefiniowane w C# (np. +, -, *, /, ==, !=, <, >, <=, >=)
+    public static Product operator +(Product left, Product right)
+    {
+        Product newProduct = new Product();
+        newProduct.Name = $"{left.Name} + {right.Name}";
+        newProduct.Price = left.Price + right.Price;
+        newProduct.Price *= 0.9f; //10% zniżki za zakup w pakiecie
+        newProduct.ExpirationDate = left.ExpirationDate < right.ExpirationDate ? left.ExpirationDate : right.ExpirationDate;
+
+        return newProduct;
+    }
+
+    //możemy przeciążyć operator również dla innych typów
+    //w tym przypadku dodajemy do ceny produktu wartość typu float
+    public static Product operator +(Product left, float right)
+    {
+        left.Price += right;
+        return left;
+    }
+
 }
 
