@@ -2,8 +2,11 @@
 
 namespace ConsoleApp
 {
-    internal class Introduction
+    //klasa statyczna - klasa, która nie może być instancjonowana (nie można utworzyć obiektu tej klasy)
+    //wszystkie metody i pola w klasie statycznej są statyczne
+    internal static class Introduction
     {
+        //metoda statyczne - metoda, która jest wywoływana bez potrzeby tworzenia instancji klasy
         public static void Run()
         {
             Console.WriteLine("Hello, World!");

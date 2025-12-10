@@ -2,6 +2,7 @@
 //wszystko co jest napisane w tym pliku jest traktowane jako kod, który będzie otoczony klasą Program i metodą Main podczas kompilacji
 
 
+using ConsoleApp;
 using ConsoleApp.Models;
 
 Console.WriteLine(typeof(Product).Name);
@@ -24,3 +25,5 @@ Console.WriteLine(product.FullInfo);
 
 product = new Product("Smartphone", DateTime.Now.AddMonths(6));
 Console.WriteLine(product.FullInfo);
+
+Introduction.Run();
