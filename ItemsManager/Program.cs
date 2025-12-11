@@ -1,4 +1,5 @@
 ﻿
+using Models;
 using Services.InMemory;
 using Services.Interfaces;
 
@@ -26,11 +27,14 @@ while (!exit)
         Console.WriteLine($"{item.Id}. {item.Name} - {item.Price} - {item.CreatedAt}");
     }
 
-    Console.WriteLine("Commands: delete, exit");
+    Console.WriteLine("Commands: create, delete, exit");
     string? input = Console.ReadLine();
 
     switch(input?.ToLower())
     {
+        case "create":
+            Create();
+            break;
         case "delete":
             Delete();
             break;
@@ -44,6 +48,77 @@ while (!exit)
 
     Console.WriteLine("Press any key...");
     Console.ReadKey();
+}
+
+string ReadString(string label)
+{
+    Console.Write(label);
+    return Console.ReadLine() ?? string.Empty; //jeśli użytkownik nie poda nazwy, przypisujemy pusty string. ?? - operator null-coalescing
+}
+
+float ReadFloat(string label)
+{
+    Console.Write(label);
+
+    string? input = Console.ReadLine();
+    float price;
+    //TryParse - próbuje przekonwertować string na float
+    if (float.TryParse(input, out price))
+    {
+        return price;
+    }
+    else
+    {
+        Console.WriteLine("Invalid price, try again.");
+        return ReadFloat(label); //rekurencyjne wywołanie funkcji, aż użytkownik poda poprawną wartość
+    }
+}
+
+DateTime ReadDate(string label)
+{
+    Console.Write(label);
+    string? input = Console.ReadLine();
+
+    DateTime date;
+    try
+    {
+        date = DateTime.Parse(input ?? string.Empty);
+        if (date > DateTime.Now)
+            throw new InvalidDataException("Date cannot be in the future");
+
+        return date;
+    }
+
+    //filtrowanie wyjątków - możemy obsługiwać różne wyjątki w różny sposób
+    //catch z tylko typem wyjątku - oznacza, że łapiemy dowolny wyjątek dziedzicący po wskazanym typie wyjątku
+    catch (FormatException) //instancja wyjątku nie jest nam potrzebna, więc nie musimy deklarować nazywanej zmiennej, która będzie przechowywać wyjątek
+    {
+        Console.WriteLine("Invalid date format");
+        return ReadDate(label);
+    }
+    //catch(Exception ex) - z parametrem - przechwytuje wyjątki zgodne z klasą parametru, dając wgląd w obiekt wyjątku
+    catch (InvalidDataException ex) //tutaj potrzebujemy informacji o wyjątku, więc deklarujemy zmienną ex
+    {
+        Console.WriteLine(ex.Message);
+        return DateTime.Now;
+    }
+    //kolejność bloków catch ma znaczenie - najpierw sprawdzane są bardziej szczegółowe wyjątki, potem bardziej ogólne
+    //nie powinniśmy umieszczać catch z typem bazowym (np. Exception) przed catch z typem pochodnym (np. FormatException), ponieważ spowoduje to, że catch z typem pochodnym nigdy nie zostanie osiągnięty
+    catch /*(Exception)*/
+    {
+        Console.WriteLine("Unknown error");
+        return ReadDate(label);
+    }
+}
+
+void Create()
+{
+    Product item = new Product();
+    item.Name = ReadString("Name: ");
+    item.Price = ReadFloat("Price: ");
+    item.CreatedAt = ReadDate("Date (yyyy-MM-dd hh:mm:ss): ");
+
+    service.Create(item);
 }
 
 void Delete()
