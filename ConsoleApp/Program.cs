@@ -13,3 +13,6 @@ delegatesExample.Test();
 
 MulticastDelegateExample multicastDelegateExample = new MulticastDelegateExample();
 multicastDelegateExample.Test();
+
+BuildInDelegatesExample buildInDelegatesExample = new BuildInDelegatesExample();
+buildInDelegatesExample.Test();
