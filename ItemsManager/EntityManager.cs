@@ -4,7 +4,10 @@ using Services.Interfaces;
 
 namespace ItemsManager
 {
-    internal abstract class EntityManager
+    // <T> - oznacza, że klasa jest generyczna i może być używana z różnymi typami danych
+    //T jest parametrem typu, który będzie używany w klasie
+    //where T : Entity - oznacza, że klasa generyczna T musi być typu Entity lub jej pochodną
+    internal abstract class EntityManager<T> where T : Entity
     {
         IEntityService service = new EntityService();
 
@@ -15,7 +18,7 @@ namespace ItemsManager
             {
                 Console.Clear();
 
-                foreach (Entity item in service.GetAll())
+                foreach (T item in service.GetAll())
                 {
                     Console.WriteLine(item.ToString());
                 }
@@ -120,7 +123,7 @@ namespace ItemsManager
             }
         }
 
-        protected DateTime ReadDate(string label, DateTime? defaultValue = null)
+        protected virtual DateTime ReadDate(string label, DateTime? defaultValue = null)
         {
             Console.Write(label);
             string? input = Console.ReadLine();
@@ -164,14 +167,14 @@ namespace ItemsManager
         void Edit()
         {
             int id = ReadInt("Id: ");
-            Entity? item = service.Get(id);
+            T? item = (T?)service.Get(id);
             if (item is null)
             {
                 Console.WriteLine("Entity not found.");
                 return; //return poza zwrotem wartości - kończy działanie metody void
             }
 
-            Entity entity = CreateEntity();
+            T entity = CreateEntity();
             entity.Name = ReadString($"Name ({item.Name}): ", item.Name);
             ExtraEdit(entity, item);
 
@@ -179,20 +182,20 @@ namespace ItemsManager
         }
 
         //metoda abstrakcyjna pozwala na edycję dodatkowych właściwości encji specyficznych dla danego menedżera
-        protected abstract void ExtraEdit(Entity entity, Entity item);
+        protected abstract void ExtraEdit(T entity, T item);
 
         void Create()
         {
-            Entity item = CreateEntity();
+            T item = CreateEntity();
             item.Name = ReadString("Name: ");
             ExtraCreate(item);
 
             service.Create(item);
         }
         //metoda abstrakcyjna pozwala na utworzenie encji specyficznej dla danego menedżera (np. ProductManager tworzy Product, CustomerManager tworzy Customer)
-        protected abstract Entity CreateEntity();
+        protected abstract T CreateEntity();
         //metoda abstrakcyjna pozwala na uzupełnienie dodatkowych właściwości encji specyficznych dla danego menedżera
-        protected abstract void ExtraCreate(Entity entity);
+        protected abstract void ExtraCreate(T entity);
 
         void Delete()
         {
