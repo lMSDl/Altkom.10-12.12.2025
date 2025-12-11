@@ -3,13 +3,19 @@ using Models;
 using Services.InMemory;
 using Services.Interfaces;
 
-IProductsService service = new ProductsService();
+IEntityService service = new EntityService();
 
 service.Create(new Models.Product
 {
     Name = "Product 1",
     Price = 10.5f,
 });
+//dzięki polimorfizmowi możemy używać tej samej metody Create do tworzenia różnych typów encji
+/*service.Create(new Models.Person
+{
+    Name = "John Doe",
+    BirthDate = new DateTime(1990, 1, 1),
+});*/
 service.Create(new Models.Product
 {
     Name = "Product 2",
@@ -22,9 +28,9 @@ while (!exit)
 {
     Console.Clear();
 
-    foreach (var item in service.GetAll())
+    foreach (Entity item in service.GetAll())
     {
-        Console.WriteLine($"{item.Id}. {item.Name} - {item.Price} - {item.CreatedAt}");
+        Console.WriteLine(item.ToString());
     }
 
     Console.WriteLine("Commands: create, edit, delete, exit");
@@ -170,7 +176,7 @@ DateTime ReadDate(string label, DateTime? defaultValue = null)
 void Edit()
 {
     int id = ReadInt("Id: ");
-    Product? item = service.Get(id);
+    Entity? item = (Product)service.Get(id);
     if (item is null)
     {
         Console.WriteLine("Product not found.");
