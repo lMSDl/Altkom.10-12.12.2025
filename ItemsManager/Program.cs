@@ -21,19 +21,22 @@ bool exit = false;
 while (!exit)
 {
     Console.Clear();
-    
+
     foreach (var item in service.GetAll())
     {
         Console.WriteLine($"{item.Id}. {item.Name} - {item.Price} - {item.CreatedAt}");
     }
 
-    Console.WriteLine("Commands: create, delete, exit");
+    Console.WriteLine("Commands: create, edit, delete, exit");
     string? input = Console.ReadLine();
 
-    switch(input?.ToLower())
+    switch (input?.ToLower())
     {
         case "create":
             Create();
+            break;
+        case "edit":
+            Edit();
             break;
         case "delete":
             Delete();
@@ -50,17 +53,66 @@ while (!exit)
     Console.ReadKey();
 }
 
-string ReadString(string label)
+//string? defaultValue = null - oznacza, że parametr jest opcjonalny i jeśli nie zostanie podany, to przyjmie wartość null
+//parametry domyślne muszą być na końcu listy parametrów
+//jeśli parametr ma wartość domyślną, to nie musimy go podawać przy wywołaniu funkcji (patrz funkcja Create)
+string ReadString(string label, string? defaultValue = null)
 {
     Console.Write(label);
-    return Console.ReadLine() ?? string.Empty; //jeśli użytkownik nie poda nazwy, przypisujemy pusty string. ?? - operator null-coalescing
+    var input = Console.ReadLine();
+    if (string.IsNullOrWhiteSpace(input) && defaultValue is not null)
+    {
+        return defaultValue;
+    }
+
+    return input ?? string.Empty; //jeśli użytkownik nie poda nazwy, przypisujemy pusty string. ?? - operator null-coalescing
 }
 
-float ReadFloat(string label)
+int ReadInt(string label)
+{
+    int result;
+    while (!TryReadInt(label, out result))
+    {
+        //pusta pętla - wykonuje się aż do momentu, gdy TryReadInt zwróci true
+    }
+    return result;
+}
+
+//Try Patter - metoda zwraca bool, a wynik konwersji jest przekazywany przez parametr out
+bool TryReadInt(string label, out int result)
+{
+    Console.Write(label);
+    string? input = Console.ReadLine();
+    //try-catch - służy do obsługi wyjątków
+    //w bloku try umieszczamy kod, który może zgłosić wyjątek
+    try
+    {
+        //jeśli konwersja się powiedzie, przypisujemy wartość do zmiennej out i zwracamy true
+        result = int.Parse(input);
+        return true;
+    }
+    //catch bez parametru - przechwytuje wszystkie wyjątki, ale nie daje nam informacji o wyjątku
+    catch
+    {
+        Console.WriteLine("Invalid integer, try again.");
+        //musimy przypisać wartość do zmiennej out w przypadku niepowodzenia
+        result = default; // przypisanie domyślnej wartości zgodnej z typem zmiennej (dla int to 0)
+        // zwracamy false, ponieważ konwersja się nie powiodła
+        return false;
+    }
+}
+
+
+float ReadFloat(string label, float? defaultValue = null)
 {
     Console.Write(label);
 
     string? input = Console.ReadLine();
+    if (string.IsNullOrWhiteSpace(input) && defaultValue.HasValue)
+    {
+        return defaultValue.Value;
+    }
+
     float price;
     //TryParse - próbuje przekonwertować string na float
     if (float.TryParse(input, out price))
@@ -74,10 +126,14 @@ float ReadFloat(string label)
     }
 }
 
-DateTime ReadDate(string label)
+DateTime ReadDate(string label, DateTime? defaultValue = null)
 {
     Console.Write(label);
     string? input = Console.ReadLine();
+    if (string.IsNullOrWhiteSpace(input) && defaultValue.HasValue)
+    {
+        return defaultValue.Value;
+    }
 
     DateTime date;
     try
@@ -111,6 +167,24 @@ DateTime ReadDate(string label)
     }
 }
 
+void Edit()
+{
+    int id = ReadInt("Id: ");
+    Product? item = service.Get(id);
+    if (item is null)
+    {
+        Console.WriteLine("Product not found.");
+        return; //return poza zwrotem wartości - kończy działanie metody void
+    }
+
+    Product product = new Product();
+    product.Name = ReadString($"Name ({item.Name}): ", item.Name);
+    product.Price = ReadFloat($"Price ({item.Price}): ", item.Price);
+    product.CreatedAt = ReadDate($"Date ({item.CreatedAt:yyyy-MM-dd hh:mm:ss}): ", item.CreatedAt);
+
+    service.Update(id, product);
+}
+
 void Create()
 {
     Product item = new Product();
@@ -123,24 +197,10 @@ void Create()
 
 void Delete()
 {
-    string? input;
-    int id;
-    Console.Write("Id: ");
-    input = Console.ReadLine();
+    int id = ReadInt("Id: ");
 
-    //try-catch - służy do obsługi wyjątków
-    //w bloku try umieszczamy kod, który może zgłosić wyjątek
-    try
-    {
-        id = int.Parse(input);
-    }
-    //catch bez parametru - przechwytuje wszystkie wyjątki, ale nie daje nam informacji o wyjątku
-    catch
-    {
-        id = 0;
-    }
 
-    if(!service.Delete(id))
+    if (!service.Delete(id))
     {
         Console.WriteLine("Product not found");
     }
