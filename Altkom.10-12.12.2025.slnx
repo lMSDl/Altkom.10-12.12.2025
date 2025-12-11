@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="ConsoleApp/ConsoleApp.csproj" />
+  <Project Path="Inheritance/Inheritance.csproj" />
   <Project Path="ItemsManager/ItemsManager.csproj" />
   <Project Path="Models/Models.csproj" />
   <Project Path="Services.InMemory/Services.InMemory.csproj" />
