@@ -7,6 +7,10 @@ namespace ItemsManager
 {
     internal class ToDoManager : EntityManager<ToDo>
     {
+        public ToDoManager(string filePath) : base(filePath)
+        {
+        }
+
         protected override ToDo CreateEntity()
         {
             return new ToDo();

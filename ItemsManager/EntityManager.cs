@@ -11,6 +11,12 @@ namespace ItemsManager
     internal abstract class EntityManager<T> where T : Entity
     {
         protected IEntityService service = new EntityService();
+        private readonly string _filePath;
+
+        protected EntityManager(string filePath)
+        {
+            _filePath = filePath;
+        }
 
         public void Run()
         {
@@ -54,6 +60,31 @@ namespace ItemsManager
                 Console.ReadKey();
             }
         }
+        
+        public void SaveToFile(string data, string extension)
+        {
+            Console.WriteLine("Save to file?");
+            string? input = Console.ReadLine();
+            if(input?.ToLower() != "y")
+            {
+                return; //jeśli użytkownik nie chce zapisać do pliku, to wychodzimy z metody
+            }
+
+            //klasy strumieniowe - klasy opierające swoje działanie na strumieniu byte'ów
+            //wykorzustanie using spowoduje automatyczne wywołanie funkcji Dispose
+            using FileStream fileStream = new FileStream(_filePath + $".{extension}", FileMode.Create);
+
+            //var bytes = System.Text.Encoding.UTF8.GetBytes(data); //konwersja stringa na tablicę byte'ów
+            //fileStream.Write(bytes); //zapis do pliku
+
+            using StreamWriter streamWriter = new StreamWriter(fileStream); //StreamWriter opakowuje FileStream i pozwala na zapis stringów bezpośrednio do strumienia
+            streamWriter.Write(data); //zapis do pliku
+            fileStream.Flush(); //wymusza zapis wszystkich danych do pliku / opróżnia bufor strumienia
+
+            //fileStream.Dispose(); //zwalnianie zasobów po zakończeniu pracy ze strumieniem
+        }
+
+
 
         //serializacja - proces przekształcania obiektu w format (najcześciej tekstowy), który można przechowywać lub przesyłać
         void ToJson()
@@ -72,6 +103,7 @@ namespace ItemsManager
             //JsonSerializer może serializować obiekty bezpośrednio do stringa
             var json = JsonSerializer.Serialize(items, options);
             Console.WriteLine(json);
+            SaveToFile(json, "json");
         }
 
         void ToXml()
@@ -85,7 +117,9 @@ namespace ItemsManager
             using var stringWriter = new StringWriter();
             xmlSerializer.Serialize(stringWriter, items);
 
-            Console.WriteLine(stringWriter.ToString());
+            var xml = stringWriter.ToString();
+            Console.WriteLine(xml);
+            SaveToFile(xml, "xml");
         }
 
 

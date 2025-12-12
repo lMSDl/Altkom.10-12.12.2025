@@ -7,6 +7,10 @@ namespace ItemsManager
 {
     internal class PeopleManager : EntityManager<Person>
     {
+        public PeopleManager(string filePath) : base(filePath)
+        {
+        }
+
         protected override Person CreateEntity()
         {
             return new Person();
