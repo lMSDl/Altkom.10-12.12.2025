@@ -1,6 +1,7 @@
 ﻿using Models;
 using Services.InMemory;
 using Services.Interfaces;
+using System.Text.Json;
 
 namespace ItemsManager
 {
@@ -9,7 +10,7 @@ namespace ItemsManager
     //where T : Entity - oznacza, że klasa generyczna T musi być typu Entity lub jej pochodną
     internal abstract class EntityManager<T> where T : Entity
     {
-        IEntityService service = new EntityService();
+        protected IEntityService service = new EntityService();
 
         public void Run()
         {
@@ -21,7 +22,7 @@ namespace ItemsManager
                 //Console.WriteLine(service.GetAll().Select(x => x.ToString()).Aggregate((acc, text) => $"{acc}\n{text}"));
                 Console.WriteLine(string.Join("\n", service.GetAll().Select(x => x.ToString())));
 
-                Console.WriteLine("Commands: create, edit, delete, exit");
+                Console.WriteLine("Commands: create, edit, delete, json, xml, exit");
                 string? input = Console.ReadLine();
 
                 switch (input?.ToLower())
@@ -35,6 +36,12 @@ namespace ItemsManager
                     case "delete":
                         Delete();
                         break;
+                    case "xml":
+                        ToXml();
+                        break;
+                    case "json":
+                        ToJson();
+                        break;
                     case "exit":
                         exit = true;
                         break;
@@ -47,6 +54,40 @@ namespace ItemsManager
                 Console.ReadKey();
             }
         }
+
+        //serializacja - proces przekształcania obiektu w format (najcześciej tekstowy), który można przechowywać lub przesyłać
+        void ToJson()
+        {
+            var items = service.GetAll().Cast<T>().ToArray();
+
+            JsonSerializerOptions options = new JsonSerializerOptions
+            {
+                WriteIndented = true, //ładne formatowanie JSON-a z wcięciami
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase, //właściwości obiektu będą zapisywane w formacie camelCase
+                IgnoreReadOnlyProperties = true, //ignorowanie właściwości tylko do odczytu podczas serializacji
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault //ignorowanie właściwości, które mają wartość domyślną (np. null dla referencji, 0 dla int itp.)
+            };
+
+            //JsonSerializer - klasa do serializacji obiektów do formatu JSON
+            //JsonSerializer może serializować obiekty bezpośrednio do stringa
+            var json = JsonSerializer.Serialize(items, options);
+            Console.WriteLine(json);
+        }
+
+        void ToXml()
+        {
+            var items = service.GetAll().Cast<T>().ToArray();
+
+            //xmlSerializer - klasa do serializacji obiektów do formatu XML
+            var xmlSerializer = new System.Xml.Serialization.XmlSerializer(typeof(T[])); //musimy określić typ obiektu, który będziemy serializować (w tym przypadku tablica T)
+
+            //xmlSerializer oparty jest o strumienie, więc musimy użyć StringWriter do zapisu do stringa
+            using var stringWriter = new StringWriter();
+            xmlSerializer.Serialize(stringWriter, items);
+
+            Console.WriteLine(stringWriter.ToString());
+        }
+
 
         //string? defaultValue = null - oznacza, że parametr jest opcjonalny i jeśli nie zostanie podany, to przyjmie wartość null
         //parametry domyślne muszą być na końcu listy parametrów
