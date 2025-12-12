@@ -1,4 +1,5 @@
-﻿using Models;
+﻿using ItemsManager.Encryption;
+using Models;
 using Services.InMemory;
 using Services.Interfaces;
 using System.Text.Json;
@@ -90,6 +91,13 @@ namespace ItemsManager
 
             switch (Path.GetExtension(filePath))
             {
+                case ".enc":
+                    byte[] bytes = File.ReadAllBytes(filePath);
+                    //var json = new SymmetricEncryption().Decrypt(bytes, "alamakota");
+                    var json = new AsymmetricEncryption().Decrypt(bytes, "CN=localhost");
+                    items = JsonSerializer.Deserialize<T[]>(json, _options)!;
+                    break;
+
                 case ".json":
                     string content = File.ReadAllText(filePath); //odczyt całej zawartości pliku do stringa - prostsza wersja powyższego kodu
                     items = JsonSerializer.Deserialize<T[]>(content, _options)!;
@@ -126,6 +134,12 @@ namespace ItemsManager
 
             // File - fasada do operacji na plikach, która udostępnia statyczne metody do pracy z plikami (tworzenie, odczyt, zapis, usuwanie itp.)
             File.WriteAllText(_filePath + $".{extension}", data); //zapis do pliku o podanej ścieżce
+             //File.Encrypt(_filePath + $".{extension}"); //szyfrowanie pliku (dostępne tylko na systemach Windows)
+
+
+            //var encryptedData = new SymmetricEncryption().Encrypt(data, "alamakota");
+            var encryptedData = new AsymmetricEncryption().Encrypt(data, "CN=localhost");
+            File.WriteAllBytes(_filePath + $".{extension}.enc", encryptedData);
         }
 
         public void SaveToFileUsingStreams(string data, string extension)
