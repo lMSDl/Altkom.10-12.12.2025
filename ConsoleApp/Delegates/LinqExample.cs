@@ -55,6 +55,7 @@ namespace ConsoleApp.Delegates
             string[] names = products.Where(x => x.Price > 5).Select(x => x.Name).ToArray();
             names = products.Where(x => x.Price > 5).Select(x => x.Name).Where(x => x.Length > 5).ToArray();
             names = products.Where(x => x.Price > 5).Where(x => x.Name.Length > 5).Select(x => x.Name).ToArray(); //równoważne zapytanie z powyższym
+            var p = products.Where(x => x.Price > 5).Where(x => x.Name.Length > 5).Select(x => new { x.Name, x.Price }).ToArray(); //tworzymy anonimowy typ z Name i Price
 
             //Avegage - średnia, zapytanie aggregujące
             float averagePrice = products.Average(x => x.Price);
