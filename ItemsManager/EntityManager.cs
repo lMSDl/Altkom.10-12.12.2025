@@ -2,6 +2,7 @@
 using Services.InMemory;
 using Services.Interfaces;
 using System.Text.Json;
+using System.Xml.Serialization;
 
 namespace ItemsManager
 {
@@ -12,6 +13,14 @@ namespace ItemsManager
     {
         protected IEntityService service = new EntityService();
         private readonly string _filePath;
+
+        private JsonSerializerOptions _options = new JsonSerializerOptions
+        {
+            WriteIndented = true, //ładne formatowanie JSON-a z wcięciami
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase, //właściwości obiektu będą zapisywane w formacie camelCase
+            IgnoreReadOnlyProperties = true, //ignorowanie właściwości tylko do odczytu podczas serializacji
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault //ignorowanie właściwości, które mają wartość domyślną (np. null dla referencji, 0 dla int itp.)
+        };
 
         protected EntityManager(string filePath)
         {
@@ -28,7 +37,7 @@ namespace ItemsManager
                 //Console.WriteLine(service.GetAll().Select(x => x.ToString()).Aggregate((acc, text) => $"{acc}\n{text}"));
                 Console.WriteLine(string.Join("\n", service.GetAll().Select(x => x.ToString())));
 
-                Console.WriteLine("Commands: create, edit, delete, json, xml, exit");
+                Console.WriteLine("Commands: create, edit, delete, json, xml, import, exit");
                 string? input = Console.ReadLine();
 
                 switch (input?.ToLower())
@@ -48,6 +57,9 @@ namespace ItemsManager
                     case "json":
                         ToJson();
                         break;
+                    case "import":
+                        Import();
+                        break;
                     case "exit":
                         exit = true;
                         break;
@@ -61,7 +73,47 @@ namespace ItemsManager
             }
         }
 
+        void Import()
+        {
+            string filePath = ReadString("Enter file path to import data from:").Trim("\"").ToString();
+            if (!File.Exists(filePath))
+            {
+                Console.WriteLine("File not found.");
+                return;
+            }
 
+            //using FileStream fileStream = new FileStream(filePath, FileMode.Open); //otwarcie pliku do odczytu
+            //using StreamReader streamReader = new StreamReader(fileStream); //StreamReader opakowuje FileStream i pozwala na odczyt stringów bezpośrednio ze strumienia
+            //string content = streamReader.ReadToEnd(); //odczyt całej zawartości pliku do stringa
+            //Console.WriteLine(content);
+            IEnumerable<T> items;
+
+            switch (Path.GetExtension(filePath))
+            {
+                case ".json":
+                    string content = File.ReadAllText(filePath); //odczyt całej zawartości pliku do stringa - prostsza wersja powyższego kodu
+                    items = JsonSerializer.Deserialize<T[]>(content, _options)!;
+
+                    break;
+                case ".xml":
+                    {
+                        XmlSerializer xmlSerializer = new System.Xml.Serialization.XmlSerializer(typeof(T[]));
+                        using FileStream fileStream = new FileStream(filePath, FileMode.Open);
+                        items = (IEnumerable<T>)xmlSerializer.Deserialize(fileStream)!;
+                    }
+                    break;
+                default:
+                    Console.WriteLine("Unsupported file format.");
+                    items = Array.Empty<T>();
+                    return;
+            }
+
+            foreach (T item in items)
+            {
+                service.Create(item);
+            }
+
+        }
 
         public void SaveToFile(string data, string extension)
         {
@@ -80,7 +132,7 @@ namespace ItemsManager
         {
             Console.WriteLine("Save to file?");
             string? input = Console.ReadLine();
-            if(input?.ToLower() != "y")
+            if (input?.ToLower() != "y")
             {
                 return; //jeśli użytkownik nie chce zapisać do pliku, to wychodzimy z metody
             }
@@ -104,35 +156,35 @@ namespace ItemsManager
         //serializacja - proces przekształcania obiektu w format (najcześciej tekstowy), który można przechowywać lub przesyłać
         void ToJson()
         {
-            var items = service.GetAll().Cast<T>().ToArray();
+            T[] items = service.GetAll().Cast<T>().ToArray();
 
-            JsonSerializerOptions options = new JsonSerializerOptions
-            {
-                WriteIndented = true, //ładne formatowanie JSON-a z wcięciami
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase, //właściwości obiektu będą zapisywane w formacie camelCase
-                IgnoreReadOnlyProperties = true, //ignorowanie właściwości tylko do odczytu podczas serializacji
-                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault //ignorowanie właściwości, które mają wartość domyślną (np. null dla referencji, 0 dla int itp.)
-            };
+
 
             //JsonSerializer - klasa do serializacji obiektów do formatu JSON
             //JsonSerializer może serializować obiekty bezpośrednio do stringa
-            var json = JsonSerializer.Serialize(items, options);
+            var json = JsonSerializer.Serialize(items, _options);
             Console.WriteLine(json);
             SaveToFile(json, "json");
         }
 
         void ToXml()
         {
-            var items = service.GetAll().Cast<T>().ToArray();
+            T[] items = service.GetAll().Cast<T>().ToArray();
 
             //xmlSerializer - klasa do serializacji obiektów do formatu XML
-            var xmlSerializer = new System.Xml.Serialization.XmlSerializer(typeof(T[])); //musimy określić typ obiektu, który będziemy serializować (w tym przypadku tablica T)
+            XmlSerializer xmlSerializer = new System.Xml.Serialization.XmlSerializer(typeof(T[])); //musimy określić typ obiektu, który będziemy serializować (w tym przypadku tablica T)
 
             //xmlSerializer oparty jest o strumienie, więc musimy użyć StringWriter do zapisu do stringa
-            using var stringWriter = new StringWriter();
-            xmlSerializer.Serialize(stringWriter, items);
+            //using var stringWriter = new StringWriter();
+            //xmlSerializer.Serialize(stringWriter, items);
+            //var xml = stringWriter.ToString();
 
-            var xml = stringWriter.ToString();
+            using MemoryStream memoryStream = new MemoryStream(); //strumień pamięciowy - strumień oparty o pamięć RAM
+            xmlSerializer.Serialize(memoryStream, items);
+            var xmlArray = memoryStream.ToArray(); //pobranie tablicy byte'ów ze strumienia pamięciowego
+            var xml = System.Text.Encoding.UTF8.GetString(xmlArray); //konwersja tablicy byte'ów na string
+
+
             Console.WriteLine(xml);
             SaveToFile(xml, "xml");
         }
