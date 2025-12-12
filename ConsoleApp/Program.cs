@@ -19,3 +19,5 @@ buildInDelegatesExample.Test();
 
 LinqExample linqExamples = new LinqExample();
 linqExamples.Test();
+
+new LINQ().Exercises();
