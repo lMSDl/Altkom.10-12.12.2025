@@ -18,10 +18,8 @@ namespace ItemsManager
             {
                 Console.Clear();
 
-                foreach (T item in service.GetAll())
-                {
-                    Console.WriteLine(item.ToString());
-                }
+                //Console.WriteLine(service.GetAll().Select(x => x.ToString()).Aggregate((acc, text) => $"{acc}\n{text}"));
+                Console.WriteLine(string.Join("\n", service.GetAll().Select(x => x.ToString())));
 
                 Console.WriteLine("Commands: create, edit, delete, exit");
                 string? input = Console.ReadLine();

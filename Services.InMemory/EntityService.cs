@@ -14,17 +14,9 @@ namespace Services.InMemory
 
         public void Create(Entity entity)
         {
-            int maxId = 0;
-            //szukamy największego id w kolekcji
-            foreach (Entity e in _entities)
-            {
-                if(e.Id > maxId)
-                {
-                    maxId = e.Id;
-                }
-            }
-
-            entity.Id = maxId + 1; 
+            //jeśli nie użyjemy DefaultIfEmpty(), to w przypadku pustej kolekcji Max rzuci wyjątek
+            //więc dodajemy DefaultIfEmpty(), które zwróci 0, jeśli kolekcja jest pusta
+            entity.Id = _entities.Select(x => x.Id).DefaultIfEmpty().Max() + 1;
 
             _entities.Add(entity);
         }
@@ -42,22 +34,13 @@ namespace Services.InMemory
 
         public Entity? Get(int id)
         {
-            Entity? product = null;
-            foreach(Entity entity in _entities)
-            {
-                if(entity.Id == id)
-                {
-                    product = entity;
-                    break;
-                }
-            }
-
-            return product;
+            return _entities.FirstOrDefault(x => x.Id == id);
         }
 
         public IEnumerable<Entity> GetAll()
         {
-            return new List<Entity>(_entities);
+            //ToList tworzy nową listę z kolekcji _entites
+            return _entities.ToList();
         }
 
         public bool Update(int id, Entity entity)
