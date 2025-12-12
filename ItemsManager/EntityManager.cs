@@ -60,8 +60,23 @@ namespace ItemsManager
                 Console.ReadKey();
             }
         }
-        
+
+
+
         public void SaveToFile(string data, string extension)
+        {
+            Console.WriteLine("Save to file?");
+            string? input = Console.ReadLine();
+            if (input?.ToLower() != "y")
+            {
+                return; //jeśli użytkownik nie chce zapisać do pliku, to wychodzimy z metody
+            }
+
+            // File - fasada do operacji na plikach, która udostępnia statyczne metody do pracy z plikami (tworzenie, odczyt, zapis, usuwanie itp.)
+            File.WriteAllText(_filePath + $".{extension}", data); //zapis do pliku o podanej ścieżce
+        }
+
+        public void SaveToFileUsingStreams(string data, string extension)
         {
             Console.WriteLine("Save to file?");
             string? input = Console.ReadLine();
