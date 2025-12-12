@@ -16,3 +16,6 @@ multicastDelegateExample.Test();
 
 BuildInDelegatesExample buildInDelegatesExample = new BuildInDelegatesExample();
 buildInDelegatesExample.Test();
+
+LinqExample linqExamples = new LinqExample();
+linqExamples.Test();
