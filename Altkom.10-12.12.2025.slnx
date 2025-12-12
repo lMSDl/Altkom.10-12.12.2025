@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="AsyncAwait/AsyncAwait.csproj" />
   <Project Path="ConsoleApp/ConsoleApp.csproj" />
   <Project Path="Inheritance/Inheritance.csproj" />
   <Project Path="ItemsManager/ItemsManager.csproj" />
